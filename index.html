@@ -1,397 +1,297 @@
-<!-- Header -->
-<header class="bg-amber-800 text-white shadow-md py-4 px-6 flex justify-between items-center">
-    <div class="flex items-center space-x-3">
-        <span class="text-3xl">🧋</span>
-        <div>
-            <h1 class="text-xl font-bold tracking-wider">手搖珍奶職人</h1>
-            <p class="text-xs text-amber-200">Boba Tea Master Simulator</p>
-        </div>
-    </div>
-    <div class="flex items-center space-x-6 bg-amber-900/60 px-4 py-2 rounded-xl border border-amber-700">
-        <div class="text-center">
-            <span class="block text-xs text-amber-300">金幣 / 營業額</span>
-            <span id="money" class="text-lg font-black text-amber-100">$0</span>
-        </div>
-        <div class="h-8 w-px bg-amber-700"></div>
-        <div class="text-center">
-            <span class="block text-xs text-amber-300">今日評價</span>
-            <span id="reputation" class="text-lg font-black text-yellow-300">⭐⭐⭐⭐⭐</span>
-        </div>
-    </div>
-</header>
-
-<!-- Main Game Area -->
-<main class="max-w-5xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 md:grid-cols-3 gap-6 my-auto">
-    
-    <!-- Left Panel: Customer & Order -->
-    <section class="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 flex flex-col justify-between relative overflow-hidden">
-        <div>
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-xs font-semibold uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full">顧客點餐單</span>
-                <span id="timer" class="text-xs font-bold text-rose-500 bg-rose-50 px-2 py-1 rounded-md hidden">倒數中...</span>
-            </div>
-
-            <!-- Customer Avatar & Dialogue -->
-            <div class="flex items-center space-x-4 mb-4 bg-amber-50/50 p-3 rounded-xl border border-amber-100">
-                <div id="customer-avatar" class="text-4xl bg-white p-3 rounded-xl shadow-sm border border-amber-200">👩‍🎓</div>
-                <div>
-                    <h2 id="customer-name" class="font-bold text-slate-700">等待客人上門...</h2>
-                    <p id="customer-dialogue" class="text-xs text-slate-500 mt-0.5">點擊下方「開始營業」迎接第一位客人！</p>
-                </div>
-            </div>
-
-            <!-- Order Details -->
-            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2 mb-4">
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">訂單明細：</h3>
-                <ul id="order-list" class="text-sm space-y-1 text-slate-700 font-medium">
-                    <li class="text-slate-400 italic">尚無訂單</li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Game Actions / Start Button -->
-        <div class="space-y-2">
-            <button id="action-btn" onclick="nextCustomer()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center space-x-2">
-                <span>🔔</span>
-                <span>迎接下一位客人</span>
-            </button>
-            <button id="serve-btn" onclick="serveTea()" disabled class="w-full bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center space-x-2 hidden">
-                <span>✨</span>
-                <span>出餐給客人！</span>
-            </button>
-        </div>
-    </section>
-
-    <!-- Center Panel: Cup Making Station -->
-    <section class="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 flex flex-col items-center justify-between">
-        <div class="w-full flex justify-between items-center mb-2">
-            <span class="text-xs font-semibold uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full">製作工作台</span>
-            <button onclick="resetCup()" class="text-xs text-rose-500 hover:text-rose-700 font-medium bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-md transition">重新製作</button>
-        </div>
-
-        <!-- Visual Boba Cup -->
-        <div class="relative w-44 h-64 my-4 flex flex-col items-center justify-end">
-            <!-- Cup Lid -->
-            <div class="w-36 h-3 bg-slate-300 rounded-t-lg relative z-20 border-b border-slate-400">
-                <!-- Straw -->
-                <div id="straw" class="absolute -top-12 left-1/2 -translate-x-1/2 w-4 h-16 bg-gradient-to-r from-pink-400 to-rose-500 rounded-full transform -rotate-12 shadow-sm transition-all duration-300 opacity-0"></div>
-            </div>
-            
-            <!-- Cup Body (Trapezoid container) -->
-            <div id="cup-body" class="w-32 h-52 bg-white/70 backdrop-blur-sm border-4 border-slate-300 rounded-b-3xl relative overflow-hidden flex flex-col justify-end shadow-inner transition-all duration-300">
-                
-                <!-- Ice Layer -->
-                <div id="layer-ice" class="w-full transition-all duration-300 flex flex-wrap content-end justify-center p-1 gap-1"></div>
-
-                <!-- Toppings Layer (Bottom) -->
-                <div id="layer-toppings" class="w-full transition-all duration-300 flex flex-wrap content-end justify-center p-1 gap-1"></div>
-
-                <!-- Tea / Liquid Layer -->
-                <div id="layer-liquid" class="w-full h-0 transition-all duration-500 relative"></div>
-
-                <!-- Cup Gloss Reflection -->
-                <div class="absolute top-2 left-2 w-2 h-40 bg-white/40 rounded-full pointer-events-none"></div>
-            </div>
-        </div>
-
-        <!-- Current Cup Status Text -->
-        <div id="cup-status" class="text-xs font-medium text-slate-500 text-center bg-amber-50 w-full py-2 rounded-lg border border-amber-100">
-            杯子目前是空的，請加入茶底
-        </div>
-    </section>
-
-    <!-- Right Panel: Ingredients Controller -->
-    <section class="bg-white rounded-2xl shadow-sm border border-amber-200 p-5 flex flex-col justify-between">
-        <div class="space-y-4">
-            <span class="text-xs font-semibold uppercase tracking-wider text-amber-800 bg-amber-100 px-2.5 py-1 rounded-full inline-block mb-1">原料控制台</span>
-
-            <!-- Tea Base -->
-            <div>
-                <label class="text-xs font-bold text-slate-600 mb-1.5 block">1. 選擇茶底 (Tea Base)</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="selectTea('black', '紅茶', 'bg-amber-700/80')" class="tea-btn p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-medium transition flex flex-col items-center">
-                        <span class="text-xl">🍂</span>紅茶
-                    </button>
-                    <button onclick="selectTea('green', '綠茶', 'bg-emerald-600/70')" class="tea-btn p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-medium transition flex flex-col items-center">
-                        <span class="text-xl">🍵</span>綠茶
-                    </button>
-                    <button onclick="selectTea('oolong', '烏龍茶', 'bg-amber-900/70')" class="tea-btn p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-medium transition flex flex-col items-center">
-                        <span class="text-xl">🌾</span>烏龍
-                    </button>
-                </div>
-            </div>
-
-            <!-- Toppings -->
-            <div>
-                <label class="text-xs font-bold text-slate-600 mb-1.5 block">2. 添加配料 (Toppings)</label>
-                <div class="grid grid-cols-3 gap-2">
-                    <button onclick="addTopping('boba', '珍珠', '🌰')" class="topping-btn p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-medium transition flex flex-col items-center">
-                        <span class="text-xl">🧋</span>珍珠
-                    </button>
-                    <button onclick="addTopping('coconut', '椰果', '🧊')" class="topping-btn p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-medium transition flex flex-col items-center">
-                        <span class="text-xl">🥥</span>椰果
-                    </button>
-                    <button onclick="addTopping('pudding', '布丁', '🍮')" class="topping-btn p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 text-xs font-medium transition flex flex-col items-center">
-                        <span class="text-xl">🍮</span>布丁
-                    </button>
-                </div>
-            </div>
-
-            <!-- Ice & Sugar -->
-            <div class="grid grid-cols-2 gap-3">
-                <div>
-                    <label class="text-xs font-bold text-slate-600 mb-1.5 block">3. 冰塊 (Ice)</label>
-                    <select id="ice-select" onchange="updateIce()" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-amber-500 font-medium">
-                        <option value="regular">正常冰</option>
-                        <option value="less">少冰</option>
-                        <option value="none">去冰</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-slate-600 mb-1.5 block">4. 甜度 (Sugar)</label>
-                    <select id="sugar-select" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:border-amber-500 font-medium">
-                        <option value="regular">正常糖 (100%)</option>
-                        <option value="less">半糖 (50%)</option>
-                        <option value="none">無糖 (0%)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Shake Action -->
-        <button onclick="shakeCup()" class="w-full mt-4 bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-xl shadow transition transform active:scale-95 text-xs flex items-center justify-center space-x-1.5">
-            <span>🔄</span>
-            <span>搖勻手搖飲</span>
-        </button>
-    </section>
-
-</main>
-
-<!-- Footer Credit -->
-<footer class="text-center py-4 text-xs text-amber-700/70">
-    純前端 HTML / Tailwind CSS 製作 🧋 輕鬆部署至 GitHub Pages
-</footer>
-
-<!-- JavaScript Game Logic -->
-<script>
-    // Game State
-    let score = 0;
-    let customerActive = false;
-    let currentOrder = null;
-    
-    // Player's current drink creation
-    let playerDrink = {
-        tea: null,
-        teaName: '',
-        teaColor: '',
-        toppings: [],
-        ice: 'regular',
-        sugar: 'regular',
-        shaked: false
-    };
-
-    // Customer Profiles
-    const customers = [
-        { name: "小明同學", avatar: "👦", dialogue: "老闆！我要一杯珍珠奶茶，正常冰半糖！" },
-        { name: "上班族小美", avatar: "👩‍💼", dialogue: "下午好，來杯烏龍茶加椰果，去冰半糖謝謝。" },
-        { name: "珍奶狂熱者阿傑", avatar: "😎", dialogue: "給我一杯綠茶，加珍珠加布丁！正常冰正常糖！" },
-        { name: "注重養生的小安", avatar: "👧", dialogue: "請問有綠茶嗎？我要去冰無糖，加個椰果就好～" }
-    ];
-
-    // Web Audio API Sound Generator (No external asset dependency)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(type) {
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手搖珍奶職人模擬器 - Boba Master</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; }
+        .bouncing { animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-8px); }
         }
-        const osc = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
+    </style>
+</head>
+<body class="bg-amber-50 text-stone-800 min-h-screen flex flex-col items-center justify-between p-4">
 
-        if (type === 'click') {
-            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.08);
-            gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.08);
-        } else if (type === 'success') {
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
-            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
-            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // G5
-            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.4);
-        } else if (type === 'fail') {
-            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
-            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.3);
-        }
-    }
+    <!-- 頂部標題與狀態列 -->
+    <header class="w-full max-w-2xl bg-white shadow-md rounded-2xl p-4 mb-4 flex flex-col md:flex-row justify-between items-center border border-amber-100">
+        <div class="flex items-center space-x-3 mb-2 md:mb-0">
+            <span class="text-3xl">🧋</span>
+            <div>
+                <h1 class="text-xl font-black text-amber-900">手搖珍奶職人模擬器</h1>
+                <p class="text-xs text-amber-600 font-medium">Boba Master Simulator v2.0</p>
+            </div>
+        </div>
+        <div class="flex space-x-4 bg-amber-50 px-4 py-2 rounded-xl border border-amber-200">
+            <div class="text-center">
+                <p class="text-xs text-amber-700 font-bold">營業額</p>
+                <p id="money" class="text-lg font-black text-amber-900">$0</p>
+            </div>
+            <div class="border-r border-amber-200"></div>
+            <div class="text-center">
+                <p class="text-xs text-amber-700 font-bold">平均評價</p>
+                <p id="rating" class="text-lg font-black text-amber-900">⭐⭐⭐⭐⭐</p>
+            </div>
+        </div>
+    </header>
 
-    function nextCustomer() {
-        playSound('click');
-        customerActive = true;
+    <!-- 主遊戲區 -->
+    <main class="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         
-        // Randomly pick a customer and generate order requirements
-        const randomCust = customers[Math.floor(Math.random() * customers.length)];
-        
-        const teas = ['black', 'green', 'oolong'];
-        const teaNames = {'black': '紅茶', 'green': '綠茶', 'oolong': '烏龍茶'};
-        const iceOptions = ['regular', 'less', 'none'];
-        const iceNames = {'regular': '正常冰', 'less': '少冰', 'none': '去冰'};
-        const sugarOptions = ['regular', 'less', 'none'];
-        const sugarNames = {'regular': '正常糖', 'less': '半糖', 'none': '無糖'};
-        const toppingOptions = [[], ['boba'], ['coconut'], ['pudding'], ['boba', 'pudding']];
-        const toppingNames = {'boba': '珍珠', 'coconut': '椰果', 'pudding': '布丁'};
+        <!-- 左側：顧客與訂單 -->
+        <div class="bg-white shadow-md rounded-2xl p-5 border border-amber-100 flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-stone-500 uppercase tracking-wider">目前顧客</h2>
+                    <span id="customer-timer" class="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-full">倒數中: 30s</span>
+                </div>
+                <div id="customer-box" class="bg-amber-50/50 rounded-xl p-4 border border-amber-200 text-center mb-4">
+                    <div id="customer-avatar" class="text-4xl mb-2 bouncing">🧑‍💼</div>
+                    <p id="customer-dialog" class="text-sm font-bold text-amber-900">「點擊下方按鈕迎接第一位客人！」</p>
+                </div>
+                <div class="bg-stone-50 rounded-xl p-3 border border-stone-200">
+                    <p class="text-xs font-bold text-stone-500 mb-1">訂單需求明細：</p>
+                    <ul id="order-details" class="text-sm text-stone-700 space-y-1">
+                        <li>- 尚無訂單</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-4 flex space-x-2">
+                <button onclick="nextCustomer()" id="next-btn" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition transform active:scale-95 text-sm">
+                    🔔 迎接下一位客人
+                </button>
+                <button onclick="serveDrink()" id="serve-btn" disabled class="flex-1 bg-stone-300 text-stone-500 font-bold py-2.5 px-4 rounded-xl cursor-not-allowed transition text-sm">
+                    ✨ 出餐給客人！
+                </button>
+            </div>
+        </div>
 
-        currentOrder = {
-            customer: randomCust,
-            tea: teas[Math.floor(Math.random() * teas.length)],
-            toppings: toppingOptions[Math.floor(Math.random() * toppingOptions.length)],
-            ice: iceOptions[Math.floor(Math.random() * iceOptions.length)],
-            sugar: sugarOptions[Math.floor(Math.random() * sugarOptions.length)]
+        <!-- 右側：製作工作台預覽 -->
+        <div class="bg-white shadow-md rounded-2xl p-5 border border-amber-100 flex flex-col items-center justify-between">
+            <div class="w-full">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-stone-500 uppercase tracking-wider">工作台預覽</h2>
+                    <button onclick="resetCup()" class="text-xs text-stone-400 hover:text-red-500 underline">重新製作</button>
+                </div>
+                <!-- 珍奶杯視覺顯示 -->
+                <div class="relative w-32 h-44 mx-auto bg-amber-100/30 border-4 border-t-0 border-stone-300 rounded-b-3xl flex flex-col justify-end items-center overflow-hidden shadow-inner">
+                    <!-- 配料沉淀區 -->
+                    <div id="cup-toppings" class="absolute bottom-1 w-24 flex flex-wrap justify-center items-end gap-0.5 z-10"></div>
+                    <!-- 茶水液體 -->
+                    <div id="cup-liquid" class="w-full h-0 transition-all duration-500 z-0 opacity-80"></div>
+                    <!-- 杯口裝飾 -->
+                    <div class="absolute top-0 w-36 h-2 bg-stone-300 rounded-full"></div>
+                </div>
+            </div>
+            <div id="cup-status" class="mt-3 text-xs text-stone-500 font-medium text-center">
+                杯子目前是空的，請加入茶底
+            </div>
+        </div>
+    </main>
+
+    <!-- 原料控制台 -->
+    <section class="w-full max-w-2xl bg-white shadow-md rounded-2xl p-5 border border-amber-100 mb-4">
+        <h2 class="text-sm font-bold text-stone-500 uppercase tracking-wider mb-3">原料控制台</h2>
+        
+        <!-- 1. 茶底 -->
+        <div class="mb-3">
+            <label class="text-xs font-bold text-amber-800 block mb-1">1. 選擇茶底 (Tea Base)</label>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="selectTea('紅茶', '#b45309')" class="bg-amber-100 hover:bg-amber-200 border border-amber-300 font-bold py-1.5 px-3 rounded-lg text-xs transition">🔴 紅茶</button>
+                <button onclick="selectTea('綠茶', '#15803d')" class="bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 font-bold py-1.5 px-3 rounded-lg text-xs transition">🟢 綠茶</button>
+                <button onclick="selectTea('烏龍茶', '#78350f')" class="bg-yellow-900/20 hover:bg-yellow-900/30 border border-yellow-900/30 font-bold py-1.5 px-3 rounded-lg text-xs transition">🟤 烏龍茶</button>
+            </div>
+        </div>
+
+        <!-- 2. 配料 -->
+        <div class="mb-3">
+            <label class="text-xs font-bold text-amber-800 block mb-1">2. 添加配料 (Toppings)</label>
+            <div class="grid grid-cols-3 gap-2">
+                <button onclick="addTopping('珍珠', '⚫')" class="bg-stone-100 hover:bg-stone-200 border border-stone-300 font-bold py-1.5 px-3 rounded-lg text-xs transition">🧋 珍珠</button>
+                <button onclick="addTopping('椰果', '🧊')" class="bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 font-bold py-1.5 px-3 rounded-lg text-xs transition">🥥 椰果</button>
+                <button onclick="addTopping('布丁', '🍮')" class="bg-orange-100 hover:bg-orange-200 border border-orange-300 font-bold py-1.5 px-3 rounded-lg text-xs transition">🍮 布丁</button>
+            </div>
+        </div>
+
+        <!-- 3. 冰塊與甜度 -->
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="text-xs font-bold text-amber-800 block mb-1">3. 冰塊 (Ice)</label>
+                <select id="ice-select" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-1.5 text-xs font-medium">
+                    <option value="正常冰">正常冰</option>
+                    <option value="少冰" selected>少冰</option>
+                    <option value="去冰">去冰</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-bold text-amber-800 block mb-1">4. 甜度 (Sugar)</label>
+                <select id="sugar-select" class="w-full bg-stone-50 border border-stone-300 rounded-lg p-1.5 text-xs font-medium">
+                    <option value="正常糖">正常糖</option>
+                    <option value="半糖">半糖</option>
+                    <option value="微糖" selected>微糖 (30%)</option>
+                    <option value="無糖">無糖</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-xs text-stone-400 font-medium">
+        ✨ 專為 VS Code 與 GitHub Pages 設計的純前端互動網頁
+    </footer>
+
+    <!-- 遊戲邏輯 Script -->
+    <script>
+        let money = 0;
+        let totalScore = 5.0;
+        let servedCount = 0;
+        let currentOrder = null;
+
+        // 玩家當前製作的飲料狀態
+        let playerDrink = {
+            tea: null,
+            teaColor: '',
+            toppings: [],
+            ice: '少冰',
+            sugar: '微糖'
         };
 
-        // Update UI
-        document.getElementById('customer-avatar').innerText = randomCust.avatar;
-        document.getElementById('customer-name').innerText = randomCust.name;
-        document.getElementById('customer-dialogue').innerText = `「老闆！我要一杯${teaNames[currentOrder.tea]}${currentOrder.toppings.map(t => '加' + toppingNames[t]).join('')}，${iceNames[currentOrder.ice]}${sugarNames[currentOrder.sugar]}！」`;
+        const avatars = ['🧑‍💼', '👩‍🎓', '👨‍💻', '👩‍🎨', '👵', '🧑‍🎤'];
+        const names = ['上班族小陳', '大學生小美', '工程師杰哥', '藝術家Amy', '鄰居阿嬤', '搖滾樂手Leo'];
 
-        let toppingsText = currentOrder.toppings.length > 0 ? currentOrder.toppings.map(t => toppingNames[t]).join('、') : '無加料';
-        document.getElementById('order-list').innerHTML = `
-            <li>• 茶底：${teaNames[currentOrder.tea]}</li>
-            <li>• 配料：${toppingsText}</li>
-            <li>• 冰塊：${iceNames[currentOrder.ice]}</li>
-            <li>• 甜度：${sugarNames[currentOrder.sugar]}</li>
-        `;
-
-        // Switch action buttons
-        document.getElementById('action-btn').classList.add('hidden');
-        document.getElementById('serve-btn').classList.remove('hidden');
-
-        resetCup();
-    }
-
-    function selectTea(teaKey, teaName, colorClass) {
-        playSound('click');
-        playerDrink.tea = teaKey;
-        playerDrink.teaName = teaName;
-        playerDrink.teaColor = colorClass;
-
-        // Update liquid view
-        const liquid = document.getElementById('layer-liquid');
-        liquid.className = `w-full h-32 transition-all duration-500 relative ${colorClass}`;
-        document.getElementById('straw').style.opacity = '1';
-        
-        updateCupStatus();
-    }
-
-    function addTopping(toppingKey, toppingName, emoji) {
-        playSound('click');
-        if (!playerDrink.toppings.includes(toppingKey)) {
-            playerDrink.toppings.push(toppingKey);
+        function nextCustomer() {
+            // 隨機生成訂單
+            const teas = ['紅茶', '綠茶', '烏龍茶'];
+            const availableToppings = ['珍珠', '椰果', '布丁'];
             
-            const toppingsContainer = document.getElementById('layer-toppings');
-            const badge = document.createElement('span');
-            badge.className = 'text-lg animate-bounce';
-            badge.innerText = emoji;
-            toppingsContainer.appendChild(badge);
+            const randomTea = teas[Math.floor(Math.random() * teas.length)];
+            const randomTopping = Math.random() > 0.3 ? availableToppings[Math.floor(Math.random() * availableToppings.length)] : null;
+            const randomIce = ['正常冰', '少冰', '去冰'][Math.floor(Math.random() * 3)];
+            const randomSugar = ['正常糖', '半糖', '微糖', '無糖'][Math.floor(Math.random() * 4)];
+
+            currentOrder = {
+                name: names[Math.floor(Math.random() * names.length)],
+                avatar: avatars[Math.floor(Math.random() * avatars.length)],
+                tea: randomTea,
+                topping: randomTopping,
+                ice: randomIce,
+                sugar: randomSugar
+            };
+
+            // 更新介面
+            document.getElementById('customer-avatar').innerText = currentOrder.avatar;
+            document.getElementById('customer-dialog').innerText = `「老闆！我要一杯 ${currentOrder.tea}，加 ${currentOrder.topping || '不加配料'}，${currentOrder.ice}、${currentOrder.sugar}！謝謝！」`;
+            
+            let detailsHtml = `<li>- 茶底：<b>${currentOrder.tea}</b></li>`;
+            detailsHtml += `<li>- 配料：<b>${currentOrder.topping || '無'}</b></li>`;
+            detailsHtml += `<li>- 冰塊/甜度：<b>${currentOrder.ice} / ${currentOrder.sugar}</b></li>`;
+            document.getElementById('order-details').innerHTML = detailsHtml;
+
+            // 啟用出餐按鈕，停用迎接按鈕
+            document.getElementById('serve-btn').disabled = false;
+            document.getElementById('serve-btn').className = "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition transform active:scale-95 text-sm cursor-pointer";
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').className = "flex-1 bg-stone-300 text-stone-500 font-bold py-2.5 px-4 rounded-xl cursor-not-allowed transition text-sm";
+            
+            resetCup();
+        }
+
+        function selectTea(teaName, colorHex) {
+            playerDrink.tea = teaName;
+            playerDrink.teaColor = colorHex;
+            
+            const liquid = document.getElementById('cup-liquid');
+            liquid.style.backgroundColor = colorHex;
+            liquid.style.height = '75%';
             
             updateCupStatus();
         }
-    }
 
-    function updateIce() {
-        playSound('click');
-        playerDrink.ice = document.getElementById('ice-select').value;
-        
-        const iceContainer = document.getElementById('layer-ice');
-        iceContainer.innerHTML = '';
-        
-        if (playerDrink.ice !== 'none') {
-            const count = playerDrink.ice === 'regular' ? 4 : 2;
-            for (let i = 0; i < count; i++) {
-                const cube = document.createElement('span');
-                cube.className = 'text-sm opacity-80';
-                cube.innerText = '🧊';
-                iceContainer.appendChild(cube);
+        function addTopping(toppingName, emoji) {
+            if (!playerDrink.tea) {
+                alert('請先選擇茶底再加配料喔！');
+                return;
             }
-        }
-    }
-
-    function shakeCup() {
-        playSound('click');
-        playerDrink.shaked = true;
-        const cup = document.getElementById('cup-body');
-        cup.classList.add('shaking');
-        setTimeout(() => {
-            cup.classList.remove('shaking');
-        }, 500);
-        updateCupStatus();
-    }
-
-    function updateCupStatus() {
-        let status = `已選擇：${playerDrink.teaName || '未選茶'} | 配料：${playerDrink.toppings.length ? playerDrink.toppings.join(', ') : '無'} ${playerDrink.shaked ? '✨(已搖勻)' : ''}`;
-        document.getElementById('cup-status').innerText = status;
-    }
-
-    function resetCup() {
-        playerDrink = {
-            tea: null,
-            teaName: '',
-            teaColor: '',
-            toppings: [],
-            ice: 'regular',
-            sugar: 'regular',
-            shaked: false
-        };
-        document.getElementById('layer-liquid').className = 'w-full h-0 transition-all duration-500 relative';
-        document.getElementById('layer-liquid').style.backgroundColor = '';
-        document.getElementById('layer-toppings').innerHTML = '';
-        document.getElementById('layer-ice').innerHTML = '';
-        document.getElementById('straw').style.opacity = '0';
-        document.getElementById('ice-select').value = 'regular';
-        document.getElementById('sugar-select').value = 'regular';
-        document.getElementById('cup-status').innerText = '杯子目前是空的，請加入茶底';
-    }
-
-    function serveTea() {
-        if (!customerActive) return;
-
-        playerDrink.sugar = document.getElementById('sugar-select').value;
-
-        // Check correctness
-        let correctTea = playerDrink.tea === currentOrder.tea;
-        let correctIce = playerDrink.ice === currentOrder.ice;
-        let correctSugar = playerDrink.sugar === currentOrder.sugar;
-        
-        // Check toppings match
-        let correctToppings = playerDrink.toppings.length === currentOrder.toppings.length && 
-                              playerDrink.toppings.every(t => currentOrder.toppings.includes(t));
-
-        if (correctTea && correctIce && correctSugar && correctToppings) {
-            playSound('success');
-            score += 60;
-            document.getElementById('money').innerText = `$${score}`;
-            document.getElementById('customer-dialogue').innerText = "「太完美了！就是這個味道，給 100 分！」🎉";
-            document.getElementById('reputation').innerText = "⭐⭐⭐⭐⭐";
-        } else {
-            playSound('fail');
-            score += 15;
-            document.getElementById('money').innerText = `$${score}`;
-            document.getElementById('customer-dialogue').innerText = "「嗯...好像跟我點的有點不太一樣欸？」😅";
-            document.getElementById('reputation').innerText = "⭐⭐⭐";
+            if (playerDrink.toppings.length >= 3) {
+                alert('杯子滿囉！最多加 3 樣配料！');
+                return;
+            }
+            playerDrink.toppings.push(toppingName);
+            
+            const toppingsBox = document.getElementById('cup-toppings');
+            const span = document.createElement('span');
+            span.innerText = emoji;
+            span.className = "text-xl drop-shadow";
+            toppingsBox.appendChild(span);
+            
+            updateCupStatus();
         }
 
-        customerActive = false;
-        document.getElementById('action-btn').classList.remove('hidden');
-        document.getElementById('serve-btn').classList.add('hidden');
-        document.getElementById('action-btn').innerText = "🔄 接待下一位客人";
-    }
-</script>
+        function resetCup() {
+            playerDrink = { tea: null, teaColor: '', toppings: [], ice: '少冰', sugar: '微糖' };
+            document.getElementById('cup-liquid').style.height = '0%';
+            document.getElementById('cup-liquid').style.backgroundColor = 'transparent';
+            document.getElementById('cup-toppings.innerHTML = ""') // Fix innerHTML clear
+            document.getElementById('cup-toppings').innerHTML = '';
+            updateCupStatus();
+        }
+
+        function updateCupStatus() {
+            let statusText = playerDrink.tea ? `已選擇：${playerDrink.tea}` : '杯子是空的';
+            if (playerDrink.toppings.length > 0) {
+                statusText += ` + 配料(${playerDrink.toppings.join(', ')})`;
+            }
+            document.getElementById('cup-status').innerText = statusText;
+        }
+
+        function serveDrink() {
+            if (!currentOrder) return;
+
+            // 取得選取的冰塊與甜度
+            playerDrink.ice = document.getElementById('ice-select').value;
+            playerDrink.sugar = document.getElementById('sugar-select').value;
+
+            // 簡易評分邏輯
+            let score = 5;
+            let feedback = "完美！客人非常滿意！⭐⭐⭐⭐⭐";
+
+            if (playerDrink.tea !== currentOrder.tea) {
+                score -= 2;
+                feedback = "哎呀！茶底泡錯囉！⭐";
+            }
+            if (JSON.stringify(playerDrink.toppings.sort()) !== JSON.stringify([currentOrder.topping].filter(Boolean).sort())) {
+                score -= 1.5;
+                feedback = "配料好像跟客人點的不太一樣...⭐⭐⭐";
+            }
+            if (playerDrink.ice !== currentOrder.ice || playerDrink.sugar !== currentOrder.sugar) {
+                score -= 0.5;
+                feedback = "冰塊或甜度跟客人的要求有落差！⭐⭐⭐⭐";
+            }
+
+            if (score < 1) score = 1;
+
+            // 結算金幣與評分
+            let earned = Math.round(score * 20);
+            money += earned;
+            servedCount++;
+            totalScore = ((totalScore * (servedCount - 1) + score) / servedCount).toFixed(1);
+
+            document.getElementById('money').innerText = `$${money}`;
+            document.getElementById('rating').innerText = `⭐ ${totalScore}`;
+            document.getElementById('customer-dialog').innerText = `「${feedback} (獲得 $${earned})」`;
+
+            // 恢復迎接按鈕
+            document.getElementById('serve-btn').disabled = true;
+            document.getElementById('serve-btn').className = "flex-1 bg-stone-300 text-stone-500 font-bold py-2.5 px-4 rounded-xl cursor-not-allowed transition text-sm";
+            document.getElementById('next-btn').disabled = false;
+            document.getElementById('next-btn').className = "flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-4 rounded-xl shadow transition transform active:scale-95 text-sm cursor-pointer";
+            
+            currentOrder = null;
+        }
+    </script>
+</body>
+</html>
